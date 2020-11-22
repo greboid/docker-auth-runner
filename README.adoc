@@ -1,0 +1,25 @@
+=== Docker Auth Runner
+
+This is a config generator and runner for https://github.com/cesanta/docker_auth[cessanta/docker_auth].
+
+Note: The auth server will need to be available publically and will require https, SSL termination will need to be
+handled externally.
+
+You should pre-generate a certificate and key, the cert will need to be available to the registry and this generator,
+the key is required by this generator, these are required to sign the tokens.
+
+ - `/certs/server.pem`
+ - `/certs/key.pem`
+
+The two environmental variables below are required:
+
+ - `REGISTRY_LISTEN_ADDRESS`: This should be set to the listen address for the server, this is either a port, or a
+host:port
+ - `REGISTRY_ISSUER`: This should be set to the same issuer as the configured in the registry config.
+
+You can configure individual users that will have full access to the registry, these are configured by creating a bcrypt
+username password string, as output from `htpasswd -nB <username>`, the output from this should be put in an
+environmental variable `REGISTRY_USER_X` where X is unique.
+
+You can enable a `<mirror hostname>/public` to require no auth by adding `REGISTRY_PUBLIC_FOLDER=true`
+and/or a publically available `<mirror hostname>/mirror` folder by adding `REGISTRY_PUBLIC_MIRROR=true`
