@@ -23,3 +23,18 @@ environmental variable `REGISTRY_USER_X` where X is unique.
 
 You can enable a `<mirror hostname>/public` to require no auth by adding `REGISTRY_PUBLIC_FOLDER=true`
 and/or a publically available `<mirror hostname>/mirror` folder by adding `REGISTRY_PUBLIC_MIRROR=true`
+
+
+====  Example config snippet for the registry
+
+The registry should be configured with a block similar to the below, this can also be configured with environment
+variables
+
+....
+  auth:
+    token:
+      realm: "https://<docker auth hostname>:5001/auth"
+      service: "Docker registry"
+      issuer: "Acme auth server" #Should match REGISTRY_ISSUER
+      rootcertbundle: "/certs/server.pem" #Should be the same as the auth runner
+....
