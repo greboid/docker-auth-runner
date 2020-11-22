@@ -2,26 +2,27 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/cesanta/docker_auth/auth_server/api"
 	"github.com/cesanta/docker_auth/auth_server/authn"
 	"github.com/cesanta/docker_auth/auth_server/authz"
 	"github.com/cesanta/docker_auth/auth_server/server"
 	logger "github.com/greboid/go-log"
 	"gopkg.in/yaml.v3"
-	"os"
-	"os/exec"
-	"strings"
 )
 
 var (
-	emptyString = ""
-	pullString = "pull"
-	publicWildcard = "public/*"
+	emptyString          = ""
+	pullString           = "pull"
+	publicWildcard       = "public/*"
 	publicDoubleWildcard = "public/*/*"
-	mirrorWildcard = "mirror/*"
+	mirrorWildcard       = "mirror/*"
 	mirrorDoubleWildcard = "mirror/*/*"
-	publicMirror = false
-	publicFolder = false
+	publicMirror         = false
+	publicFolder         = false
 )
 
 type User struct {
@@ -70,17 +71,17 @@ func main() {
 	}
 	users := parseUsersFromEnvironment()
 	config := server.Config{
-		Server:      server.ServerConfig{
+		Server: server.ServerConfig{
 			ListenAddress: addr,
 		},
-		Token:       server.TokenConfig{
-			Issuer: issuer,
+		Token: server.TokenConfig{
+			Issuer:     issuer,
 			Expiration: 900,
-			CertFile: "/certs/server.pem",
-			KeyFile: "/certs/key.pem",
+			CertFile:   "/certs/server.pem",
+			KeyFile:    "/certs/key.pem",
 		},
-		Users:       getUsers(users),
-		ACL:         getACL(users),
+		Users: getUsers(users),
+		ACL:   getACL(users),
 	}
 	bytes, err := yaml.Marshal(&config)
 	if err != nil {
@@ -127,7 +128,7 @@ func getACL(users []User) authz.ACL {
 	acl := make(authz.ACL, 0)
 	for index := range users {
 		acl = append(acl, authz.ACLEntry{
-			Match:   &authz.MatchConditions{
+			Match: &authz.MatchConditions{
 				Account: &users[index].Username,
 			},
 			Actions: &[]string{"*"},
