@@ -13,8 +13,7 @@ the key is required by this generator, these are required to sign the tokens.
 
 The two environmental variables below are required:
 
- - `REGISTRY_LISTEN_ADDRESS`: This should be set to the listen address for the server, this is either a port, or a
-host:port
+ - `REGISTRY_LISTEN_ADDRESS`: This should be set to port the server should listen on
  - `REGISTRY_ISSUER`: This should be set to the same issuer as the configured in the registry config.
 
 You can configure individual users that will have full access to the registry, these are configured by creating a bcrypt

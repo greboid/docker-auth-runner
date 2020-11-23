@@ -72,7 +72,7 @@ func main() {
 	users := parseUsersFromEnvironment()
 	config := server.Config{
 		Server: server.ServerConfig{
-			ListenAddress: addr,
+			ListenAddress: fmt.Sprintf(":%s", addr),
 		},
 		Token: server.TokenConfig{
 			Issuer:     issuer,
