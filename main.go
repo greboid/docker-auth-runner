@@ -141,7 +141,7 @@ func getACL(users []User) authz.ACL {
 				Account: &emptyString,
 				Name:    &mirrorWildcard,
 			},
-			Actions: &[]string{"*"},
+			Actions: &[]string{pullString},
 			Comment: &pullString,
 		})
 		acl = append(acl, authz.ACLEntry{
@@ -149,7 +149,7 @@ func getACL(users []User) authz.ACL {
 				Account: &emptyString,
 				Name:    &mirrorDoubleWildcard,
 			},
-			Actions: &[]string{"*"},
+			Actions: &[]string{pullString},
 			Comment: &pullString,
 		})
 	}
@@ -159,7 +159,7 @@ func getACL(users []User) authz.ACL {
 				Account: &emptyString,
 				Name:    &publicWildcard,
 			},
-			Actions: &[]string{"*"},
+			Actions: &[]string{pullString},
 			Comment: &pullString,
 		})
 		acl = append(acl, authz.ACLEntry{
@@ -167,7 +167,7 @@ func getACL(users []User) authz.ACL {
 				Account: &emptyString,
 				Name:    &publicDoubleWildcard,
 			},
-			Actions: &[]string{"*"},
+			Actions: &[]string{pullString},
 			Comment: &pullString,
 		})
 	}
