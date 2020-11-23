@@ -47,13 +47,13 @@ func main() {
 		log.Fatalf("REGISTRY_ISSUER is required")
 		return
 	}
-	_, err = os.Stat("/cert/server.pem")
+	_, err = os.Stat("/certs/server.pem")
 	if os.IsNotExist(err) {
-		log.Fatalf("/cert/server.pem must exist")
+		log.Fatalf("/certs/server.pem must exist")
 	}
-	_, err = os.Stat("/cert/key.pem")
+	_, err = os.Stat("/certs/key.pem")
 	if os.IsNotExist(err) {
-		log.Fatalf("/cert/key.pem must exist")
+		log.Fatalf("/certs/key.pem must exist")
 	}
 	publicMirrorString := os.Getenv("REGISTRY_PUBLIC_MIRROR")
 	if len(publicMirrorString) != 0 {
