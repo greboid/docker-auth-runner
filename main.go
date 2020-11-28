@@ -19,6 +19,7 @@ import (
 
 var (
 	emptyString          = ""
+	starString           = "*"
 	pullString           = "pull"
 	publicWildcard       = "public/*"
 	publicDoubleWildcard = "public/*/*"
@@ -29,8 +30,8 @@ var (
 	appDir               = flag.String("app-dir", "/app", "Specifies the application directory")
 	listenAddress        = flag.Int("registry-listen-address", 5001, "Specifies the auth server listen address")
 	issuer               = flag.String("registry-issuer", "Private registry", "Specifies the auth server listen address")
-	mirror               = flag.Bool("registry-mirror-folder", false, "Should there be a public /mirror folder")
-	public               = flag.Bool("registry-public-folder", false, "Should there be a public /public folder")
+	mirror               = flag.Bool("registry-mirror-folder", true, "Should there be a public /mirror folder")
+	public               = flag.Bool("registry-public-folder", true, "Should there be a public /public folder")
 )
 
 type User struct {
@@ -99,7 +100,7 @@ func main() {
 	}
 	log.Infof("Config file written")
 	log.Infof("Executing auth_server")
-	cmnd := exec.Command(authServer, *configDir+"/config.yml")
+	cmnd := exec.Command(authServer, "-logtostderr=true", *configDir+"/config.yml")
 	cmnd.Stdout = os.Stdout
 	cmnd.Stderr = os.Stderr
 	err = cmnd.Run()
@@ -127,7 +128,7 @@ func getACL(users []User) authz.ACL {
 			Match: &authz.MatchConditions{
 				Account: &users[index].Username,
 			},
-			Actions: &[]string{"*"},
+			Actions: &[]string{starString},
 			Comment: &users[index].Username,
 		})
 	}
