@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/cesanta/docker_auth/auth_server/api"
@@ -11,6 +13,7 @@ import (
 	"github.com/cesanta/docker_auth/auth_server/authz"
 	"github.com/cesanta/docker_auth/auth_server/server"
 	logger "github.com/greboid/go-log"
+	"github.com/kouhin/envflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,8 +24,13 @@ var (
 	publicDoubleWildcard = "public/*/*"
 	mirrorWildcard       = "mirror/*"
 	mirrorDoubleWildcard = "mirror/*/*"
-	publicMirror         = false
-	publicFolder         = false
+	certsDir             = flag.String("certs-dir", "/certs", "Specifies the certificates directory")
+	configDir            = flag.String("config-dir", "/app", "Specifies the config directory")
+	appDir               = flag.String("app-dir", "/app", "Specifies the application directory")
+	listenAddress        = flag.Int("registry-listen-address", 5001, "Specifies the auth server listen address")
+	issuer               = flag.String("registry-issuer", "Private registry", "Specifies the auth server listen address")
+	mirror               = flag.Bool("registry-mirror-folder", false, "Should there be a public /mirror folder")
+	public               = flag.Bool("registry-public-folder", false, "Should there be a public /public folder")
 )
 
 type User struct {
@@ -31,54 +39,42 @@ type User struct {
 }
 
 func main() {
+	if err := envflag.Parse(); err != nil {
+		fmt.Printf("Unable to load config: %s", err.Error())
+		return
+	}
 	log, err := logger.CreateLogger(false)
 	if err != nil {
 		fmt.Printf("Unable to load logger")
 		return
 	}
 	log.Infof("Starting config generator")
-	addr := os.Getenv("REGISTRY_LISTEN_ADDRESS")
-	if len(addr) == 0 {
-		log.Fatalf("REGISTRY_LISTEN_ADDRESS is required")
-		return
+	authServer := *appDir + "auth_server"
+	if runtime.GOOS == "windows" {
+		authServer = *appDir + "auth_server.exe"
 	}
-	issuer := os.Getenv("REGISTRY_ISSUER")
-	if len(issuer) == 0 {
-		log.Fatalf("REGISTRY_ISSUER is required")
-		return
-	}
-	_, err = os.Stat("/certs/server.pem")
+	_, err = os.Stat(authServer)
 	if os.IsNotExist(err) {
-		log.Fatalf("/certs/server.pem must exist")
+		log.Fatalf(authServer + " must exist")
 	}
-	_, err = os.Stat("/certs/key.pem")
+	_, err = os.Stat(*certsDir + "/server.pem")
 	if os.IsNotExist(err) {
-		log.Fatalf("/certs/key.pem must exist")
+		log.Fatalf(*certsDir + "/server.pem must exist")
 	}
-	publicMirrorString := os.Getenv("REGISTRY_PUBLIC_MIRROR")
-	if len(publicMirrorString) != 0 {
-		if strings.ToLower(publicMirrorString) == "true" {
-			log.Infof("Enabling public mirror folder")
-			publicMirror = true
-		}
-	}
-	publicFolderString := os.Getenv("REGISTRY_PUBLIC_FOLDER")
-	if len(publicFolderString) != 0 {
-		if strings.ToLower(publicFolderString) == "true" {
-			log.Infof("Enabling public folder")
-			publicFolder = true
-		}
+	_, err = os.Stat(*certsDir + "/key.pem")
+	if os.IsNotExist(err) {
+		log.Fatalf(*certsDir + "/key.pem must exist")
 	}
 	users := parseUsersFromEnvironment()
 	config := server.Config{
 		Server: server.ServerConfig{
-			ListenAddress: fmt.Sprintf(":%s", addr),
+			ListenAddress: fmt.Sprintf(":%d", *listenAddress),
 		},
 		Token: server.TokenConfig{
-			Issuer:     issuer,
+			Issuer:     *issuer,
 			Expiration: 900,
-			CertFile:   "/certs/server.pem",
-			KeyFile:    "/certs/key.pem",
+			CertFile:   *certsDir + "server.pem",
+			KeyFile:    *certsDir + "key.pem",
 		},
 		Users: getUsers(users),
 		ACL:   getACL(users),
@@ -88,7 +84,7 @@ func main() {
 		log.Fatalf("Unable to create config: %s", err.Error())
 		return
 	}
-	configFile, err := os.Create("config.yml")
+	configFile, err := os.Create(*configDir + "/config.yml")
 	if err != nil {
 		log.Fatalf("Unable to create config file: %s", err.Error())
 		return
@@ -103,7 +99,7 @@ func main() {
 	}
 	log.Infof("Config file written")
 	log.Infof("Executing auth_server")
-	cmnd := exec.Command("./auth_server", "/app/config.yml")
+	cmnd := exec.Command(authServer, *configDir+"/config.yml")
 	cmnd.Stdout = os.Stdout
 	cmnd.Stderr = os.Stderr
 	err = cmnd.Run()
@@ -135,7 +131,7 @@ func getACL(users []User) authz.ACL {
 			Comment: &users[index].Username,
 		})
 	}
-	if publicMirror {
+	if *mirror {
 		acl = append(acl, authz.ACLEntry{
 			Match: &authz.MatchConditions{
 				Account: &emptyString,
@@ -153,7 +149,7 @@ func getACL(users []User) authz.ACL {
 			Comment: &pullString,
 		})
 	}
-	if publicFolder {
+	if *public {
 		acl = append(acl, authz.ACLEntry{
 			Match: &authz.MatchConditions{
 				Account: &emptyString,

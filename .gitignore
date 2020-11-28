@@ -4,3 +4,4 @@ auth_server
 auth_server.exe
 docker_auth_runner
 docker_auth_runner.exe
+*.pem
