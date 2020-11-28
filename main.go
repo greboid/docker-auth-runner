@@ -49,9 +49,9 @@ func main() {
 		return
 	}
 	log.Infof("Starting config generator")
-	authServer := *appDir + "auth_server"
+	authServer := *appDir + "/auth_server"
 	if runtime.GOOS == "windows" {
-		authServer = *appDir + "auth_server.exe"
+		authServer = *appDir + "/auth_server.exe"
 	}
 	_, err = os.Stat(authServer)
 	if os.IsNotExist(err) {
@@ -73,8 +73,8 @@ func main() {
 		Token: server.TokenConfig{
 			Issuer:     *issuer,
 			Expiration: 900,
-			CertFile:   *certsDir + "server.pem",
-			KeyFile:    *certsDir + "key.pem",
+			CertFile:   *certsDir + "/server.pem",
+			KeyFile:    *certsDir + "/key.pem",
 		},
 		Users: getUsers(users),
 		ACL:   getACL(users),
