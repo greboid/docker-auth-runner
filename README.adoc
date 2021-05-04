@@ -37,3 +37,13 @@ variables
       issuer: "Acme auth server" #Should match REGISTRY_ISSUER
       rootcertbundle: "/certs/server.pem" #Should be the same as the auth runner
 ....
+
+==== Generating certificates
+
+You can generate the certificates with certstrap using the below commands
+
+```
+docker run --rm -it -v $PWD/out:/out squareup/certstrap --depot-path /out init --common-name "ca"
+docker run --rm -it -v $PWD/out:/out squareup/certstrap --depot-path /out request-cert --passphrase "" --common-name "registry" --domain "registry"
+docker run --rm -it -v $PWD/out:/out squareup/certstrap --depot-path /out sign --CA "ca" "registry"
+```
