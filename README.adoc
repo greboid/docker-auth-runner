@@ -1,6 +1,6 @@
 # Development on this repository has been frozen.
 
-Rather than bodge this into running how I'd like, I wrote my own [auth server](https://github.com/greboid/registryauth/) instead.
+Rather than bodge this into running how I'd like, I wrote my own https://github.com/greboid/registryauth/[auth server] instead.
 
 === Docker Auth Runner
 
